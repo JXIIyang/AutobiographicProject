@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Experimental.UIElements;
 using UnityEngine.Rendering.PostProcessing;
-using TMPro;
+using UnityEngine.SceneManagement;
 
 public class FirstPlayerController : MonoBehaviour
 {
@@ -50,6 +50,10 @@ public class FirstPlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyUp(KeyCode.R))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
         inputAxis.y = Input.GetAxis("Vertical");
         inputAxis.x = Input.GetAxis("Horizontal");
 

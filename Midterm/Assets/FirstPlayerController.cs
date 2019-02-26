@@ -1,6 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Experimental.UIElements;
+using UnityEngine.Rendering.PostProcessing;
+using TMPro;
 
 public class FirstPlayerController : MonoBehaviour
 {
@@ -8,18 +13,38 @@ public class FirstPlayerController : MonoBehaviour
     public Vector2 inputAxis;
     public Vector2 inputMouse;
 
-    public Camera mainCamera;
+    public GameObject mainCamera;
     
     
     public float forceMultiplier;
     public float mouseSensitivity;
     public float maxSpeed;
-    public float jumpForce;
+    public float JumpForce;
+
+    private float rotateMouseX;
+    private float rotateMouseY;
+
+    private bool OnGround;
+    private float JumpTime;
+
+    public GameObject BulletPrefab;
+
+
+
+    public PostProcessVolume Volume;
+    private DepthOfField _depthOfField;
+
+    public TextMeshProUGUI LoseText;
+    
+    
+    
     
     // Start is called before the first frame update
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
+        Volume.profile.TryGetSettings(out _depthOfField);
+        LoseText.enabled = false;
     }
 
     // Update is called once per frame
@@ -29,42 +54,108 @@ public class FirstPlayerController : MonoBehaviour
         inputAxis.x = Input.GetAxis("Horizontal");
 
         inputMouse.x = Input.GetAxis("Mouse X");
-        inputMouse.y = Input.GetAxis("Mouse Y");
-/*        if (mainCamera.transform.eulerAngles.x >= 270 || mainCamera.transform.eulerAngles.x <= 65 )
-        {*/
-            mainCamera.transform.Rotate(-inputMouse.y * mouseSensitivity * Time.deltaTime, 0, 0);
-            Debug.Log(mainCamera.transform.eulerAngles.x);
-/*        }
-        else 
+        inputMouse.y += Input.GetAxis("Mouse Y");
+
+        inputMouse.y = Mathf.Clamp(inputMouse.y, -90, 60);
+        
+        mainCamera.transform.localEulerAngles = new Vector3(- inputMouse.y * mouseSensitivity, 0, 0);
+
+        if (Input.GetMouseButton(0))
         {
-            if (mainCamera.transform.eulerAngles.x < 270 && mainCamera.transform.eulerAngles.x >= 150)
-            {
-                mainCamera.transform.rotation = Quaternion.Euler(270, mainCamera.transform.eulerAngles.y, mainCamera.transform.eulerAngles.z);
-                Debug.Log(mainCamera.transform.eulerAngles.x);
-            }
-            if (mainCamera.transform.eulerAngles.x > 65 && mainCamera.transform.eulerAngles.x < 150)
-            {
-                mainCamera.transform.rotation = Quaternion.Euler(65, mainCamera.transform.eulerAngles.y, mainCamera.transform.eulerAngles.z);
-                Debug.Log(mainCamera.transform.eulerAngles.x);
-            }           
-       }*/
+            Fire();
+        }
+
+
+        maxSpeed += 0.0001f;
+
+        _depthOfField.focusDistance.value = Mathf.Lerp(_depthOfField.focusDistance.value, 0f, 0.001f);
+        Debug.Log(_depthOfField.focusDistance.value);
+            
+
+
+
     }
 
     private void FixedUpdate()
     {
+/*        _rb.MovePosition(transform.position + transform.forward * inputAxis.y * forceMultiplier + transform.right * inputAxis.x * forceMultiplier);*/
+        _rb.MovePosition(transform.position + transform.forward *  maxSpeed + transform.right * inputAxis.x * forceMultiplier);
 
-/*            _rb.MovePosition(transform.position + transform.forward * inputAxis.y * forceMultiplier);*/
-            
-            _rb.MovePosition(transform.position + transform.forward * inputAxis.y * forceMultiplier  * Time.deltaTime + transform.right * inputAxis.x * forceMultiplier * Time.deltaTime);
-/*            _rb.AddForce(transform.right * inputAxis.x * forceMultiplier, ForceMode.Impulse);*/
+        _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0, inputMouse.x * mouseSensitivity * 1.3f, 0));
+        
+        
 
-/*        _rb.transform.Rotate(0, inputMouse.x * mouseSensitivity * 2, 0);**/
-        _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0, inputMouse.x * mouseSensitivity * Time.deltaTime, 0));
+//        if (Input.GetKeyDown(KeyCode.Space))
+//        {
+//            _rb.velocity = (transform.up * jumpForce, ForceMode.Impulse);
+//        }
 
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (OnGround)
+            JumpTime = 0;
+        else
         {
-            _rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+            JumpTime += Time.deltaTime;
+            if (!Input.GetKey(KeyCode.UpArrow))
+                JumpTime = 999;
+        }
+        
+        
+
+        if (Input.GetKey(KeyCode.Space) && (OnGround || JumpTime < 0.3f))
+        {
+            _rb.velocity = new Vector3(_rb.velocity.x, JumpForce, _rb.velocity.z);
+            OnGround = false;
+        }
+
+    }
+
+    private void OnCollisionStay(Collision col)
+    {
+        if (col.gameObject.CompareTag("Floor"))
+        {
+            if (!Input.GetKey(KeyCode.Space)) OnGround = true;
+        }
+        else
+        {
+            _rb.angularVelocity = Vector3.zero;
+        }
+        
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Lense"))
+        {
+            _depthOfField.focusDistance.value = 1f;
+            Destroy(other.gameObject);
+        }
+        if (other.gameObject.CompareTag("Obstacle"))
+        {
+/*            _rb.isKinematic = true;*/
+            LoseText.enabled = true;
+
+        }
+        if (other.gameObject.CompareTag("Finish"))
+        {
+/*            _rb.isKinematic = true;*/
+              LoseText.text = "You Win!";
+              LoseText.enabled = true;
+
+
         }
     }
+
+
+    private void Fire()
+    {
+        GameObject newBullet = Instantiate(BulletPrefab, transform.position + transform.forward, Quaternion.identity);
+        newBullet.GetComponent<Rigidbody>().AddForce(mainCamera.transform.forward * 20, ForceMode.Impulse);
+        
+    }
+    
+    
+    
+    
+    
+    
 }

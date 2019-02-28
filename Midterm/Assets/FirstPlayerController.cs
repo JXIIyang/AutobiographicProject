@@ -57,6 +57,8 @@ public class FirstPlayerController : MonoBehaviour
         inputAxis.y = Input.GetAxis("Vertical");
         inputAxis.x = Input.GetAxis("Horizontal");
 
+        
+        
         inputMouse.x = Input.GetAxis("Mouse X");
         inputMouse.y += Input.GetAxis("Mouse Y");
 
@@ -70,10 +72,9 @@ public class FirstPlayerController : MonoBehaviour
         }
 
 
-        maxSpeed += 0.0001f;
+/*        maxSpeed += 0.0001f;*/
 
         _depthOfField.focusDistance.value = Mathf.Lerp(_depthOfField.focusDistance.value, 0f, 0.001f);
-        Debug.Log(_depthOfField.focusDistance.value);
             
 
 
@@ -82,8 +83,8 @@ public class FirstPlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-/*        _rb.MovePosition(transform.position + transform.forward * inputAxis.y * forceMultiplier + transform.right * inputAxis.x * forceMultiplier);*/
-        _rb.MovePosition(transform.position + transform.forward *  maxSpeed + transform.right * inputAxis.x * forceMultiplier);
+        _rb.MovePosition(transform.position + transform.forward * inputAxis.y * forceMultiplier + transform.right * inputAxis.x * forceMultiplier);
+/*        _rb.MovePosition(transform.position + transform.forward *  maxSpeed + transform.right * inputAxis.x * forceMultiplier);*/
 
         _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0, inputMouse.x * mouseSensitivity * 1.3f, 0));
         
@@ -130,7 +131,7 @@ public class FirstPlayerController : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Lense"))
         {
-            _depthOfField.focusDistance.value = 1f;
+            _depthOfField.focusDistance.value = 10f;
             Destroy(other.gameObject);
         }
         if (other.gameObject.CompareTag("Obstacle"))

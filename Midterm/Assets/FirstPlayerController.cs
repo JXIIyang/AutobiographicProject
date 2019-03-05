@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
-using UnityEngine.Experimental.UIElements;
+using UnityEngine.UI;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 
@@ -29,6 +28,8 @@ public class FirstPlayerController : MonoBehaviour
 
     public GameObject BulletPrefab;
 
+    public List<Collider> Lines;
+
 
 
     public PostProcessVolume Volume;
@@ -37,6 +38,12 @@ public class FirstPlayerController : MonoBehaviour
     public TextMeshProUGUI LoseText;
     
     
+    public Collider SpeedUpTrigger;
+
+
+    private bool _speedControl;
+
+    public Image Overlay;
     
     
     // Start is called before the first frame update
@@ -45,6 +52,7 @@ public class FirstPlayerController : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         Volume.profile.TryGetSettings(out _depthOfField);
         LoseText.enabled = false;
+        _speedControl = true;
     }
 
     // Update is called once per frame
@@ -56,7 +64,7 @@ public class FirstPlayerController : MonoBehaviour
         }
         inputAxis.y = Input.GetAxis("Vertical");
         inputAxis.x = Input.GetAxis("Horizontal");
-
+        
         
         
         inputMouse.x = Input.GetAxis("Mouse X");
@@ -75,25 +83,37 @@ public class FirstPlayerController : MonoBehaviour
 /*        maxSpeed += 0.0001f;*/
 
         _depthOfField.focusDistance.value = Mathf.Lerp(_depthOfField.focusDistance.value, 0f, 0.001f);
-            
 
+        CheckOffTrack();
+        if (CheckOffTrack())
+        {
+            Overlay.color = new Color(0,0,0, Mathf.Lerp(Overlay.color.a, 1, Time.deltaTime));
+        }
+        else
+        {
+            Overlay.color = new Color(0,0,0, Mathf.Lerp(Overlay.color.a, 0, Time.deltaTime));
+        }
+        
 
 
     }
 
     private void FixedUpdate()
     {
-        _rb.MovePosition(transform.position + transform.forward * inputAxis.y * forceMultiplier + transform.right * inputAxis.x * forceMultiplier);
-/*        _rb.MovePosition(transform.position + transform.forward *  maxSpeed + transform.right * inputAxis.x * forceMultiplier);*/
-
+        if (_speedControl)
+        {
+            _rb.MovePosition(transform.position + transform.forward * inputAxis.y * forceMultiplier + transform.right * inputAxis.x * forceMultiplier);
+        }
+        else
+        {
+            _rb.MovePosition(transform.position + transform.forward * Mathf.Lerp(_rb.velocity.x, 20f, 0.03f) + transform.right * inputAxis.x * Mathf.Lerp(_rb.velocity.y, 20f, 0.03f));
+        }
+        
         _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0, inputMouse.x * mouseSensitivity * 1.3f, 0));
-        
-        
 
-//        if (Input.GetKeyDown(KeyCode.Space))
-//        {
-//            _rb.velocity = (transform.up * jumpForce, ForceMode.Impulse);
-//        }
+        
+        
+        
 
         if (OnGround)
             JumpTime = 0;
@@ -148,6 +168,12 @@ public class FirstPlayerController : MonoBehaviour
 
 
         }
+        
+        if (other == SpeedUpTrigger)
+        {
+            _speedControl = false;
+        }
+        
     }
 
 
@@ -156,6 +182,20 @@ public class FirstPlayerController : MonoBehaviour
         GameObject newBullet = Instantiate(BulletPrefab, transform.position + transform.forward, Quaternion.identity);
         newBullet.GetComponent<Rigidbody>().AddForce(mainCamera.transform.forward * 20, ForceMode.Impulse);
         
+    }
+
+
+    private bool CheckOffTrack()
+    {
+        foreach (Collider line in Lines)
+        {           
+            if (Vector3.Distance(line.ClosestPoint(transform.position), transform.position) <= 10f)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
     
     

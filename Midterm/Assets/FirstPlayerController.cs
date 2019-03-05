@@ -29,7 +29,7 @@ public class FirstPlayerController : MonoBehaviour
     public GameObject BulletPrefab;
 
     public List<Collider> Lines;
-
+    public List<TextMeshProUGUI> Texts;
 
 
     public PostProcessVolume Volume;
@@ -39,9 +39,13 @@ public class FirstPlayerController : MonoBehaviour
     
     
     public Collider SpeedUpTrigger;
+    public Collider SpeedDownTrigger;
+    public Collider Path1Trigger;
+    public Collider Path2Trigger;
 
 
     private bool _speedControl;
+    private bool _control = true;
 
     public Image Overlay;
     
@@ -87,34 +91,41 @@ public class FirstPlayerController : MonoBehaviour
         CheckOffTrack();
         if (CheckOffTrack())
         {
-            Overlay.color = new Color(0,0,0, Mathf.Lerp(Overlay.color.a, 1, Time.deltaTime));
+            Overlay.color = new Color(0,0,0, Mathf.Lerp(Overlay.color.a, 1, 0.06f));
         }
         else
         {
-            Overlay.color = new Color(0,0,0, Mathf.Lerp(Overlay.color.a, 0, Time.deltaTime));
+            Overlay.color = new Color(0,0,0, Mathf.Lerp(Overlay.color.a, 0, 0.06f));
+            LoseText.text = "You deviate.";
         }
-        
+
+        SetText();
+
+        if (Overlay.color.a >= 0.95f)
+        {
+            _control = false;
+            LoseText.enabled = true;
+        }
+
+
 
 
     }
 
     private void FixedUpdate()
     {
+        if (!_control) return;
         if (_speedControl)
         {
-            _rb.MovePosition(transform.position + transform.forward * inputAxis.y * forceMultiplier + transform.right * inputAxis.x * forceMultiplier);
+            _rb.MovePosition(transform.position + transform.forward * inputAxis.y * forceMultiplier * 2 + transform.right * inputAxis.x * forceMultiplier);
+            _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0, inputMouse.x * mouseSensitivity * 1.3f, 0));
         }
         else
         {
             _rb.MovePosition(transform.position + transform.forward * Mathf.Lerp(_rb.velocity.x, 20f, 0.03f) + transform.right * inputAxis.x * Mathf.Lerp(_rb.velocity.y, 20f, 0.03f));
         }
         
-        _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0, inputMouse.x * mouseSensitivity * 1.3f, 0));
-
-        
-        
-        
-
+        Debug.Log(_rb.velocity);
         if (OnGround)
             JumpTime = 0;
         else
@@ -156,9 +167,8 @@ public class FirstPlayerController : MonoBehaviour
         }
         if (other.gameObject.CompareTag("Obstacle"))
         {
-/*            _rb.isKinematic = true;*/
-            LoseText.enabled = true;
-
+            Overlay.color = new Color(1, 1, 1, Mathf.Lerp(Overlay.color.a, 1, 0.8f));
+            LoseText.text = "You Screwed.";
         }
         if (other.gameObject.CompareTag("Finish"))
         {
@@ -172,6 +182,18 @@ public class FirstPlayerController : MonoBehaviour
         if (other == SpeedUpTrigger)
         {
             _speedControl = false;
+        }        
+        if (other == SpeedDownTrigger)
+        {
+            _speedControl = true;
+        }
+        if (other == Path1Trigger)
+        {
+            
+        }
+        if (other == Path2Trigger)
+        {
+            _speedControl = true;
         }
         
     }
@@ -189,13 +211,31 @@ public class FirstPlayerController : MonoBehaviour
     {
         foreach (Collider line in Lines)
         {           
-            if (Vector3.Distance(line.ClosestPoint(transform.position), transform.position) <= 10f)
+            if (Vector3.Distance(line.ClosestPoint(transform.position), new Vector3(transform.position.x, 0, transform.position.z)) <= 2f)
             {
                 return false;
             }
         }
 
         return true;
+    }
+
+    private void SetText()
+    {
+        foreach (TextMeshProUGUI text in Texts)
+        {
+            if (transform.position.x - text.transform.position.x <= 50f * Mathf.Clamp(_rb.velocity.x/5, 1, 100) && transform.position.x - text.transform.position.x >= -1f)
+            {
+                text.color = new Color(1, 1, 1, Mathf.Lerp(text.color.a, 1, 0.05f));
+            }
+            
+            if (transform.position.x - text.transform.position.x < -1f)
+            {          
+                Destroy(text);
+                Texts.Remove(text);     
+            }
+            
+        }
     }
     
     

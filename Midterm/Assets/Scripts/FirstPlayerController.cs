@@ -100,7 +100,6 @@ public class FirstPlayerController : MonoBehaviour
 
 /*        maxSpeed += 0.0001f;*/
 
-Debug.Log(_rb.velocity.magnitude);
         if (_rb.velocity.magnitude > 0f)
         {
             _depthOfField.focusDistance.value = Mathf.Lerp(_depthOfField.focusDistance.value, 0f, 0.001f);
@@ -123,7 +122,6 @@ Debug.Log(_rb.velocity.magnitude);
 
         if (_screwed)
         {
-            Debug.Log("1");
             EndGame("You Screwed.",0.06f);
         }
         else
@@ -131,7 +129,7 @@ Debug.Log(_rb.velocity.magnitude);
             if (CheckOffTrack(out _distance))
             {
                 EndGame("You deviate.", 0.00f);  
-                Overlay.color = new Color(0,0,0, _distance*0.15f);
+                Overlay.color = new Color(0,0,0, (_distance-2.5f)*0.3f);
             }
             else
             {                
@@ -147,7 +145,6 @@ Debug.Log(_rb.velocity.magnitude);
     {
         LoseText.text = loseText;
         Overlay.color = new Color(0,0,0, Mathf.Lerp(Overlay.color.a, 1, rate));
-        Debug.Log("2");
     }
 
     private void SelectPath()
@@ -267,7 +264,7 @@ Debug.Log(_rb.velocity.magnitude);
         distance = 999; 
         foreach (Collider line in Lines)
         {           
-            if (Vector3.Distance(line.ClosestPoint(transform.position), new Vector3(transform.position.x, 0, transform.position.z)) <= 3f)
+            if (Vector3.Distance(line.ClosestPoint(transform.position), new Vector3(transform.position.x, 0, transform.position.z)) <= 2.5f)
             {
                 distance = 0;
                 return false;

@@ -32,6 +32,11 @@ public class FirstPlayerController : MonoBehaviour
     public List<Collider> Lines;
     public List<TextMeshProUGUI> Texts;
 
+    public GameObject Path1;
+    public GameObject Path2;
+    private bool _path1Selected;
+    private bool _path2Selected;
+
 
     public PostProcessVolume Volume;
     private DepthOfField _depthOfField;
@@ -50,7 +55,10 @@ public class FirstPlayerController : MonoBehaviour
     private bool _screwed;
 
     public Image Overlay;
-    
+
+    private float _distance;
+
+
     
     // Start is called before the first frame update
     void Start()
@@ -59,6 +67,7 @@ public class FirstPlayerController : MonoBehaviour
         Volume.profile.TryGetSettings(out _depthOfField);
         LoseText.enabled = false;
         _speedControl = true;
+        Cursor.visible = false;
     }
 
     // Update is called once per frame
@@ -107,17 +116,19 @@ public class FirstPlayerController : MonoBehaviour
         }
         else
         {
-            CheckOffTrack();
-            if (CheckOffTrack())
+            if (CheckOffTrack(out _distance))
             {
-                EndGame("You deviate.", 0.06f);  
+                EndGame("You deviate.", 0.00f);  
+                Overlay.color = new Color(0,0,0, _distance*0.15f);
             }
             else
             {                
                 Overlay.color = new Color(0,0,0, Mathf.Lerp(Overlay.color.a, 0, 0.06f));
             }
         }
-        
+
+        SelectPath();
+
     }
 
     private void EndGame(String loseText, float rate)
@@ -126,6 +137,21 @@ public class FirstPlayerController : MonoBehaviour
         Overlay.color = new Color(0,0,0, Mathf.Lerp(Overlay.color.a, 1, rate));
         Debug.Log("2");
     }
+
+    private void SelectPath()
+    {
+        if (_path1Selected)
+        {
+            Path2.SetActive(false);
+            Lines.Remove(Path2.GetComponent<Collider>());
+        }
+        if(_path2Selected)
+        {
+            Path1.SetActive(false);
+            Lines.Remove(Path1.GetComponent<Collider>());
+        }
+    }
+    
     
 
     private void FixedUpdate()
@@ -138,8 +164,8 @@ public class FirstPlayerController : MonoBehaviour
         }
         else
         {
-            _rb.rotation = Quaternion.LookRotation(Vector3.left);
-            _rb.MovePosition(transform.position + transform.forward * Mathf.Lerp(_rb.velocity.x, 30f, 0.01f) + transform.right * inputAxis.x * Mathf.Lerp(_rb.velocity.y, 20f, 0.03f));
+            _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0, inputMouse.x * mouseSensitivity, 0));
+            _rb.MovePosition(transform.position + transform.forward * Mathf.Lerp(_rb.velocity.x, 30f, 0.01f) + transform.right * inputAxis.x * Mathf.Lerp(_rb.velocity.y, 7f, 0.03f));
         }
         
         if (OnGround)
@@ -205,11 +231,12 @@ public class FirstPlayerController : MonoBehaviour
         }
         if (other == Path1Trigger)
         {
+            _path1Selected = true;
             
         }
         if (other == Path2Trigger)
         {
-            _speedControl = true;
+            _path2Selected = true;
         }
         
     }
@@ -223,16 +250,27 @@ public class FirstPlayerController : MonoBehaviour
     }
 
 
-    private bool CheckOffTrack()
+    private bool CheckOffTrack(out float distance)
     {
+        distance = 999; 
         foreach (Collider line in Lines)
         {           
             if (Vector3.Distance(line.ClosestPoint(transform.position), new Vector3(transform.position.x, 0, transform.position.z)) <= 3f)
             {
+                distance = 0;
                 return false;
             }
-        }
 
+            else
+            {
+                if (Vector3.Distance(line.ClosestPoint(transform.position),
+                        new Vector3(transform.position.x, 0, transform.position.z)) < distance)
+                    distance = Vector3.Distance(line.ClosestPoint(transform.position),
+                        new Vector3(transform.position.x, 0, transform.position.z));
+            }
+            
+        }
+        
         return true;
     }
 

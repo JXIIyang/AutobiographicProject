@@ -6,6 +6,7 @@
     <e p="D:\01_NYU\Spring 2019\IntermediateGameDev\AutobiographicProject\Midterm" t="IncludeRecursive">
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
+        <e p="PickUpController.cs" t="Include" />
         <e p="Scripts" t="Include">
           <e p="FirstPlayerController.cs" t="Include" />
           <e p="TankController.cs" t="Include" />

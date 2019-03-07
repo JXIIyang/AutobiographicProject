@@ -58,11 +58,14 @@ public class FirstPlayerController : MonoBehaviour
 
     private float _distance;
 
+    public static FirstPlayerController Singleton;
+
 
     
     // Start is called before the first frame update
     void Start()
     {
+        Singleton = this;
         _rb = GetComponent<Rigidbody>();
         Volume.profile.TryGetSettings(out _depthOfField);
         LoseText.enabled = false;
@@ -97,7 +100,16 @@ public class FirstPlayerController : MonoBehaviour
 
 /*        maxSpeed += 0.0001f;*/
 
-        _depthOfField.focusDistance.value = Mathf.Lerp(_depthOfField.focusDistance.value, 0f, 0.001f);
+Debug.Log(_rb.velocity.magnitude);
+        if (_rb.velocity.magnitude > 0f)
+        {
+            _depthOfField.focusDistance.value = Mathf.Lerp(_depthOfField.focusDistance.value, 0f, 0.001f);
+        }
+        else
+        {
+            _depthOfField.focusDistance.value = Mathf.Lerp(_depthOfField.focusDistance.value, 0f, 0.0003f);
+        }
+        
 
  
 

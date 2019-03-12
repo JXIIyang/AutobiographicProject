@@ -18,7 +18,6 @@ public class FirstPlayerController : MonoBehaviour
     
     public float forceMultiplier;
     public float mouseSensitivity;
-    public float maxSpeed;
     public float JumpForce;
 
     private float rotateMouseX;
@@ -50,7 +49,7 @@ public class FirstPlayerController : MonoBehaviour
     public Collider Path2Trigger;
 
 
-    private bool _speedControl;
+    public bool _speedControl;
     private bool _control = true;
     private bool _screwed;
 
@@ -71,6 +70,13 @@ public class FirstPlayerController : MonoBehaviour
         LoseText.enabled = false;
         _speedControl = true;
         Cursor.visible = false;
+        GameObject[] lines = GameObject.FindGameObjectsWithTag("Line");
+        Debug.Log(lines.Length);
+        foreach (GameObject line in lines)
+        {
+          var col = line.GetComponent<Collider>();
+          Lines.Add(col);
+        }
     }
 
     // Update is called once per frame
@@ -233,6 +239,7 @@ public class FirstPlayerController : MonoBehaviour
         if (other == SpeedUpTrigger)
         {
             _speedControl = false;
+            Debug.Log("SpeedUp");
         }        
         if (other == SpeedDownTrigger)
         {
@@ -241,11 +248,13 @@ public class FirstPlayerController : MonoBehaviour
         if (other == Path1Trigger)
         {
             _path1Selected = true;
+            _speedControl = true;
             
         }
         if (other == Path2Trigger)
         {
             _path2Selected = true;
+            _speedControl = true;
         }
         
     }

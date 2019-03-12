@@ -27,7 +27,10 @@ public class FirstPlayerController : MonoBehaviour
     private bool OnGround;
     private float JumpTime;
 
-    public GameObject BulletPrefab;
+    public GameObject Face1;
+    public GameObject Face2;
+    public GameObject Face3;
+    
 
     public List<Collider> Lines;
     public List<TextMeshProUGUI> Texts;
@@ -43,9 +46,15 @@ public class FirstPlayerController : MonoBehaviour
     public Collider Option3_2;
     public Collider Option4_1;
     public Collider Option4_2;
+    public Collider ETrigger;
+    public Collider GTrigger;
+    public Collider OTrigger;
     public GameObject Mask1;
     public GameObject Mask2;
     public GameObject Mask3;
+    public GameObject E;
+    public GameObject G;
+    public GameObject O;
     public GameObject Mirror;
     
     private bool _path1Selected;
@@ -81,6 +90,9 @@ public class FirstPlayerController : MonoBehaviour
     private GameObject _mirror;
 
     private bool _endGame;
+    private bool _E_QTE;
+    private bool _G_QTE;
+    private bool _O_QTE;
     
 
 
@@ -158,7 +170,7 @@ public class FirstPlayerController : MonoBehaviour
 
         if (_screwed)
         {
-            EndGame("You Screwed.",0.06f);
+            EndGame("You Screwed Up.",0.06f);
         }
         else
         {
@@ -174,6 +186,32 @@ public class FirstPlayerController : MonoBehaviour
         }
 
 //        SelectPath();
+
+        if (_E_QTE)
+        {
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                E.SetActive(false);
+                Destroy(Face1);
+            }
+        }
+
+        if (_G_QTE)
+        {
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                G.SetActive(false);
+                Destroy(Face2);
+            }
+        }
+
+        if (_O_QTE){
+            if (Input.GetKeyDown(KeyCode.O))
+            {
+                O.SetActive(false);
+                Destroy(Face3);
+            }
+        }
 
     }
 
@@ -257,14 +295,14 @@ public class FirstPlayerController : MonoBehaviour
             _screwed = true;
             Overlay.color = new Color(0, 0, 0, 0);
         }
-        if (other.gameObject.CompareTag("Finish"))
+/*        if (other.gameObject.CompareTag("Finish"))
         {
-/*            Rb.isKinematic = true;*/
+/*            Rb.isKinematic = true;#1#
               LoseText.text = "You Win!";
               LoseText.enabled = true;
 
 
-        }
+        }*/
         
         if (other == SpeedUpTrigger)
         {
@@ -276,7 +314,7 @@ public class FirstPlayerController : MonoBehaviour
             _speedControl = true;
             if (_mirror == null)
             {
-                _mirror = Instantiate(Mirror, new Vector3(transform.position.x + 5, 14f, 0), Quaternion.identity);
+                _mirror = Instantiate(Mirror, new Vector3(transform.position.x + 5, 0.9f, 0), Quaternion.identity);
             }
         }
 //        if (other == Path1Trigger)
@@ -335,9 +373,30 @@ public class FirstPlayerController : MonoBehaviour
             Rb.isKinematic = true;
             Rb.velocity = Vector3.zero;
             LoseText.enabled= true;
-        }       
+        }   
+        
+        if (other == ETrigger)
+        {
+            E.SetActive(true);
+            _E_QTE = true;
+        }
+        
+        if (other == GTrigger)
+        {
+            G.SetActive(true);
+            _G_QTE = true;
+        }
+        
+        if (other == OTrigger)
+        {
+            O.SetActive(true);
+            _O_QTE = true;
+        }
     }
 
+    
+    
+    
 //
 //    private void Fire()
 //    {

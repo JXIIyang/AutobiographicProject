@@ -3,13 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 
 public class FirstPlayerController : MonoBehaviour
 {
-    [HideInInspector]
     public Rigidbody Rb;
     public Vector2 inputAxis;
     public Vector2 inputMouse;
@@ -30,6 +30,10 @@ public class FirstPlayerController : MonoBehaviour
     public GameObject Face1;
     public GameObject Face2;
     public GameObject Face3;
+
+    public GameObject EMesh;
+    public GameObject GMesh;
+    public GameObject OMesh;
     
 
     public List<Collider> Lines;
@@ -189,9 +193,9 @@ public class FirstPlayerController : MonoBehaviour
 
         if (_E_QTE)
         {
+
             if (Input.GetKeyDown(KeyCode.E))
             {
-                E.SetActive(false);
                 Destroy(Face1);
             }
         }
@@ -200,15 +204,14 @@ public class FirstPlayerController : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.G))
             {
-                G.SetActive(false);
-                Destroy(Face2);
+              Destroy(Face2);
             }
         }
 
         if (_O_QTE){
             if (Input.GetKeyDown(KeyCode.O))
             {
-                O.SetActive(false);
+
                 Destroy(Face3);
             }
         }
@@ -377,19 +380,19 @@ public class FirstPlayerController : MonoBehaviour
         
         if (other == ETrigger)
         {
-            E.SetActive(true);
+            EMesh.SetActive(true);
             _E_QTE = true;
         }
         
         if (other == GTrigger)
         {
-            G.SetActive(true);
+            GMesh.SetActive(true);
             _G_QTE = true;
         }
         
         if (other == OTrigger)
         {
-            O.SetActive(true);
+            OMesh.SetActive(true);
             _O_QTE = true;
         }
     }

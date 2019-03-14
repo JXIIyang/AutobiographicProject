@@ -28,8 +28,16 @@ public class FirstPlayerController : MonoBehaviour
     private float JumpTime;
 
     public GameObject Face1;
+    public Animator Anim1;
+    
+   
+    
     public GameObject Face2;
+    public Animator Anim2_1;
+    public Animator Anim2_2;
+    public Animator Anim2_3;
     public GameObject Face3;
+    public Animator Anim3;
 
     public GameObject EMesh;
     public GameObject GMesh;
@@ -196,7 +204,9 @@ public class FirstPlayerController : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.E))
             {
-                Destroy(Face1);
+                Anim1.SetTrigger("Fracture");
+                Destroy(EMesh);
+                _E_QTE = false;
             }
         }
 
@@ -204,15 +214,20 @@ public class FirstPlayerController : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.G))
             {
-              Destroy(Face2);
+              Anim2_1.SetTrigger("Fracture");
+              Anim2_2.SetTrigger("Fracture");
+              Anim2_3.SetTrigger("Fracture");
+              Destroy(GMesh);
+              _G_QTE = false;
             }
         }
 
         if (_O_QTE){
             if (Input.GetKeyDown(KeyCode.O))
             {
-
-                Destroy(Face3);
+                Anim3.SetTrigger("Fracture");
+                Destroy(OMesh);
+                _O_QTE = false;
             }
         }
 

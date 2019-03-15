@@ -15,6 +15,9 @@ public class FirstPlayerController : MonoBehaviour
     public Vector2 inputMouse;
 
     public GameObject mainCamera;
+
+    private AudioSource _audio;
+    
     
     
     public float forceMultiplier;
@@ -125,6 +128,8 @@ public class FirstPlayerController : MonoBehaviour
           var col = line.GetComponent<Collider>();
           Lines.Add(col);
         }
+
+        _audio = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -190,10 +195,12 @@ public class FirstPlayerController : MonoBehaviour
             {
                 EndGame("You deviate.", 0.00f);  
                 Overlay.color = new Color(0,0,0, (_distance-2.5f)*0.3f);
+                _audio.pitch = 1 - Mathf.Clamp((_distance - 3.2f) *0.02f, 0, 0.2f);
             }
             else
             {                
                 Overlay.color = new Color(0,0,0, Mathf.Lerp(Overlay.color.a, 0, 0.06f));
+                _audio.pitch = 1;
             }
         }
 

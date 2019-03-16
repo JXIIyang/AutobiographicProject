@@ -40,11 +40,20 @@ public class FirstPlayerController : MonoBehaviour
     public Animator Anim2_2;
     public Animator Anim2_3;
     public GameObject Face3;
-    public Animator Anim3;
+    public Animator Anim3_1;
+    public Animator Anim3_2;
+    public Animator Anim3_3;
+    public Animator Anim3_4;
+    public Animator Anim3_5;
 
     public GameObject EMesh;
     public GameObject GMesh;
     public GameObject OMesh;
+
+    public Collider Face1_Trigger;
+    public Collider Face2_Trigger;
+    public Collider Face3_Trigger;
+    
     
 
     public List<Collider> Lines;
@@ -95,6 +104,7 @@ public class FirstPlayerController : MonoBehaviour
     public bool _speedControl;
     private bool _control = true;
     private bool _screwed;
+    private bool _sank;
 
     public Image Overlay;
 
@@ -137,7 +147,8 @@ public class FirstPlayerController : MonoBehaviour
     {
         if (_endGame)
         {
-            EndGame("A Game By Eleanor Yang", 0.1f);
+            EndGame("A Game By Eleanor Yang", 0.01f);
+            Rb.velocity = Vector3.zero;
             return;
         }
         
@@ -178,17 +189,23 @@ public class FirstPlayerController : MonoBehaviour
  
 
         SetText();
+/*
 
         if (Overlay.color.a >= 0.95f)
         {
-            _control = false;
+            
             LoseText.enabled = true;
-        }
+        }*/
 
         if (_screwed)
         {
-            EndGame("You Screwed Up.",0.06f);
+            EndGame("You screwed up.",0.06f);
         }
+        if (_sank)
+        {
+            EndGame("You are overwhelmed.",0.1f);
+        }
+        
         else
         {
             if (CheckOffTrack(out _distance))
@@ -212,6 +229,7 @@ public class FirstPlayerController : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.E))
             {
                 Anim1.SetTrigger("Fracture");
+                Destroy(Face1_Trigger.gameObject);
                 Destroy(EMesh);
                 _E_QTE = false;
             }
@@ -224,6 +242,7 @@ public class FirstPlayerController : MonoBehaviour
               Anim2_1.SetTrigger("Fracture");
               Anim2_2.SetTrigger("Fracture");
               Anim2_3.SetTrigger("Fracture");
+              Destroy(Face2_Trigger.gameObject);
               Destroy(GMesh);
               _G_QTE = false;
             }
@@ -232,7 +251,12 @@ public class FirstPlayerController : MonoBehaviour
         if (_O_QTE){
             if (Input.GetKeyDown(KeyCode.O))
             {
-                Anim3.SetTrigger("Fracture");
+                Anim3_1.SetTrigger("Fracture");
+                Anim3_2.SetTrigger("Fracture");
+                Anim3_3.SetTrigger("Fracture");
+                Anim3_4.SetTrigger("Fracture");
+                Anim3_5.SetTrigger("Fracture");
+                Destroy(Face3_Trigger.gameObject);
                 Destroy(OMesh);
                 _O_QTE = false;
             }
@@ -244,6 +268,11 @@ public class FirstPlayerController : MonoBehaviour
     {
         LoseText.text = loseText;
         Overlay.color = new Color(0,0,0, Mathf.Lerp(Overlay.color.a, 1, rate));
+        if (Overlay.color.a > 0.99f)
+        {
+            _control = false;
+            LoseText.enabled = true;
+        }
     }
 
 //    private void SelectPath()
@@ -318,16 +347,8 @@ public class FirstPlayerController : MonoBehaviour
         if (other.gameObject.CompareTag("Obstacle"))
         {
             _screwed = true;
-            Overlay.color = new Color(0, 0, 0, 0);
+/*            Overlay.color = new Color(0, 0, 0, 0);*/
         }
-/*        if (other.gameObject.CompareTag("Finish"))
-        {
-/*            Rb.isKinematic = true;#1#
-              LoseText.text = "You Win!";
-              LoseText.enabled = true;
-
-
-        }*/
         
         if (other == SpeedUpTrigger)
         {
@@ -342,17 +363,6 @@ public class FirstPlayerController : MonoBehaviour
                 _mirror = Instantiate(Mirror, new Vector3(transform.position.x + 5, 0.9f, 0), Quaternion.identity);
             }
         }
-//        if (other == Path1Trigger)
-//        {
-//            _path1Selected = true;
-//            _speedControl = true;
-//            
-//        }
-//        if (other == Path2Trigger)
-//        {
-//            _path2Selected = true;
-//            _speedControl = true;
-//        }
 
         if (other == Option1Trigger)
         {
@@ -395,9 +405,8 @@ public class FirstPlayerController : MonoBehaviour
         {
             _endGame = true;
             Mask3.SetActive(false);
-            Rb.isKinematic = true;
             Rb.velocity = Vector3.zero;
-            LoseText.enabled= true;
+            Rb.IsSleeping();
         }   
         
         if (other == ETrigger)
@@ -417,6 +426,16 @@ public class FirstPlayerController : MonoBehaviour
             OMesh.SetActive(true);
             _O_QTE = true;
         }
+
+        if (other == Face1_Trigger || other == Face2_Trigger || other == Face3_Trigger)
+        {
+            _sank = true;
+            Rb.velocity = Vector3.zero;
+            Debug.Log("fail");
+/*            LoseText.enabled= true;*/
+            
+        }
+        
     }
 
     
